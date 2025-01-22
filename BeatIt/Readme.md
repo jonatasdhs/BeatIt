@@ -1,0 +1,1 @@
+"./wait-for-it.sh", "sqlserver:1433", "--", 

@@ -1,0 +1,6 @@
+@BeatIt_HostAddress = http://localhost:5220
+
+GET {{BeatIt_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

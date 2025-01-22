@@ -1,0 +1,90 @@
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa]ppx/
+[Aa]pp_Data/
+bin/
+obj/
+out/
+TestResults/
+
+# Visual Studio specific
+.vs/
+.vscode/
+.vscode/**/*
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider IDE specific
+.idea/
+*.sln.iml
+
+# ASP.NET specific
+appsettings.json
+appsettings.Development.json
+
+# Node.js dependencies
+node_modules/
+npm-debug.log
+yarn.lock
+pnpm-lock.yaml
+
+# Mac files
+.DS_Store
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# NuGet packages
+*.nupkg
+*.snupkg
+# The packages folder can be ignored because of Package Restore
+**/packages/*
+# except build/, which is used as an MSBuild target
+!**/packages/build/
+# Uncomment if necessary however generally it will be regenerated when needed
+#!**/packages/repositories.config
+
+# Backup & report files from converting an old project file
+_UpgradeReport_Files/
+Backup*/
+UpgradeLog*.XML
+UpgradeLog*.htm
+
+# SQL Server files
+*.mdf
+*.ldf
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Dotnet specific
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Web files
+wwwroot/
+wwwroot/lib/
+wwwroot/dist/
+
+# Log files
+*.log
+Logs/
+
+# Resharper files
+_ReSharper*/
+*.DotSettings.user
+
+# Azure
+*.publishsettings
+*.azurePubxml
