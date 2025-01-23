@@ -56,7 +56,7 @@ namespace BeatIt.Services.AuthService
                 return Result.Failure<TokenDto>(AuthErrors.InvalidToken);
             }
             string cacheKey = $"userId: {user.Id}";
-            var refreshTokenCache = await _cache.GetFromCache(cacheKey);
+            var refreshTokenCache = await _cache.GetAsync(cacheKey);
             if (refreshTokenCache is null || refreshTokenCache != refreshTokenValues[1])
             {
                 return Result.Failure<TokenDto>(AuthErrors.InvalidToken);
@@ -89,7 +89,7 @@ namespace BeatIt.Services.AuthService
         public async Task<Result<string>> ResetPassword(string newPassword, string token)
         {
             string cacheKey = $"reset-token: ${token}";
-            var userId = await _cache.GetFromCache(cacheKey);
+            var userId = await _cache.GetAsync(cacheKey);
             if (userId is null)
             {
                 return Result.Failure<string>(AuthErrors.NotFound);

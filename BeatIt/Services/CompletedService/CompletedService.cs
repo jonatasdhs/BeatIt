@@ -4,7 +4,6 @@ using BeatIt.Models.DTOs;
 using BeatIt.Repositories;
 using BeatIt.Services.BacklogService;
 using BeatIt.Services.GameService;
-using Newtonsoft.Json;
 
 namespace BeatIt.Services.CompletedService;
 
