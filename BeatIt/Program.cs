@@ -27,8 +27,6 @@ logger.Debug("init main");
 
 try
 {
-    Environment.SetEnvironmentVariable("IGDB_CLIENT_ID", "4j8fo2mq7aqpqlsfxqt3la2x2h1tg3", EnvironmentVariableTarget.Process);
-    Environment.SetEnvironmentVariable("IGDB_SECRET_KEY", "q6zonsio48jdbt6srmkb717ezxw6lu", EnvironmentVariableTarget.Process);
     var builder = WebApplication.CreateBuilder(args);
 
     builder.Logging.ClearProviders();
@@ -76,6 +74,10 @@ try
         options.ConfigurationOptions = redisConfiguration;
         options.InstanceName = "BeatIt_";
     });
+
+    builder.Services.Configure<IgdbConfig>(
+        builder.Configuration.GetSection("IgdbConfiguration")
+    );
 
     builder.Services.AddHttpClient();
     builder.Services.AddHttpContextAccessor();

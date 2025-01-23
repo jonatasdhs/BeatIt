@@ -1,6 +1,7 @@
 using BeatIt.Utils;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BeatIt.Exceptions;
 
@@ -12,10 +13,17 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
     {
         _logger.LogError(exception, "Exception occurred: {Message}", exception.Message);
 
+        var (statusCode, title) = exception switch
+        {
+            DbUpdateException => (StatusCodes.Status500InternalServerError, "Database error occurred"),
+            _ => (StatusCodes.Status500InternalServerError, "Internal server error"),
+        };
+
         var problemDetails = new ProblemDetails
         {
-            Status = StatusCodes.Status500InternalServerError,
-            Title = "Internal server error"
+            Status = statusCode,
+            Title = title,
+            Detail = exception?.Message
         };
 
         httpContext.Response.StatusCode = problemDetails.Status.Value;

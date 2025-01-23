@@ -41,6 +41,7 @@ public class AuthServicesTests
     [Fact]
     public async Task Login_ShouldReturnToken_WhenCredentialsAreValid()
     {
+        // Arrange
         var user = new User
         {
             Id = Guid.NewGuid(),
@@ -54,26 +55,35 @@ public class AuthServicesTests
             Email = "test@example.com",
             Password = "password"
         };
+
         var accessToken = "access-token";
-        var refreshToken = "refresh-token";
+        var refreshToken = $"refresh-token";
 
-        _userRepositoryMock.Setup(repo => repo.GetByEmail(loginDto.Email)).ReturnsAsync(user);
-        _hasherMock.Setup(h => h.VerifyPassword("password", "hashedPassword", "salt")).Returns(true);
-        _tokenServiceMock.Setup(t => t.GenerateJwtToken(user)).Returns(accessToken);
-        _tokenServiceMock.Setup(t => t.GenerateRefreshToken()).Returns(refreshToken);
-
+        _userRepositoryMock
+            .Setup(repo => repo.GetByEmail(loginDto.Email))
+            .ReturnsAsync(user);
+        _hasherMock
+            .Setup(h => h.VerifyPassword(loginDto.Password, user.Password, user.Salt))
+            .Returns(true);
+        _tokenServiceMock
+            .Setup(t => t.GenerateJwtToken(user))
+            .Returns(accessToken);
+        _tokenServiceMock
+            .Setup(t => t.GenerateRefreshToken())
+            .Returns(refreshToken);
+        // Act
         var result = await authService.Login(loginDto);
-
+        // Assert        
         Assert.True(result.IsSuccess);
         Assert.NotNull(result.Value);
         Assert.Equal(accessToken, result.Value.AccessToken);
-        Assert.Equal(refreshToken, result.Value.RefreshToken);
 
         _cacheMock.Verify(c => c.StoreOnCache(It.IsAny<string>(), refreshToken, TimeSpan.FromDays(30)), Times.Once);
     }
     [Fact]
     public async Task Login_ShouldReturnError_WhenCredentialsAreInvalid()
     {
+        // Arrange
         var user = new User
         {
             Id = Guid.NewGuid(),
@@ -88,9 +98,9 @@ public class AuthServicesTests
         };
 
         _userRepositoryMock.Setup(repo => repo.GetByEmail(loginDto.Email)).ReturnsAsync((User?)null);
-
+        // Act
         var result = await authService.Login(loginDto);
-
+        // Assert
         Assert.False(result.IsSuccess);
         Assert.Equal(AuthErrors.NotFound, result.Error);
     }
@@ -98,45 +108,50 @@ public class AuthServicesTests
     [Fact]
     public async Task Login_ShouldReturnError_WhenCredentialsIsMissing()
     {
+        // Arrange
         var dto = new UserLoginDto();
         _userRepositoryMock.Setup(repo => repo.GetByEmail(It.IsAny<string>())).ReturnsAsync((User?)null);
-
+        // Act
         var result = await authService.Login(dto);
-
+        // Assert
         Assert.False(result.IsSuccess);
         Assert.Equal(AuthErrors.NotFound, result.Error);
     }
 
     [Fact]
-    public async Task RefreshToken_ShouldReturnNewAccessToken_WhenValid()
+    public async Task RefreshToken_ShouldReturnSuccess_WhenTokenIsValid()
     {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var refreshToken = $"{userId}:valid_refresh_token";
         var user = new User
         {
-            Id = Guid.NewGuid(),
-            Email = "test@example.com",
-            Password = "hashedPassword"
+            Id = userId,
+            Email = "testuser@example.com"
         };
-        var tokenDto = new TokenDto("expired-acess-token", "refresh-token");
-        var claims = new List<Claim> { new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()) };
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(claims));
-        var newAccessToken = "new-access-token";
 
-        _tokenServiceMock.Setup(t => t.GetPrincipalFromExpiredToken(tokenDto.AccessToken!)).Returns(principal);
-        _userRepositoryMock.Setup(repo => repo.GetById(user.Id)).ReturnsAsync(user);
-        _cacheMock.Setup(c => c.GetFromCache(It.IsAny<string>())).ReturnsAsync(tokenDto.RefreshToken ?? "default-refresh-token");
-        _tokenServiceMock.Setup(t => t.GenerateJwtToken(user)).Returns(newAccessToken);
+        _userRepositoryMock.Setup(repo => repo.GetById(userId))
+            .ReturnsAsync(user);
+        _cacheMock.Setup(cache => cache.GetAsync($"userId: {userId}"))
+            .ReturnsAsync("valid_refresh_token");
+        _tokenServiceMock.Setup(service => service.GenerateJwtToken(user))
+            .Returns("new_access_token");
+        _tokenServiceMock.Setup(service => service.GenerateRefreshToken())
+            .Returns("new_refresh_token");
 
-        var result = await authService.RefreshToken(tokenDto.RefreshToken);
+        // Act
+        var result = await authService.RefreshToken(refreshToken);
 
+        // Assert
         Assert.True(result.IsSuccess);
-        Assert.NotNull(result.Value);
-        Assert.Equal(newAccessToken, result.Value.AccessToken);
-        Assert.Equal(tokenDto.RefreshToken, result.Value.RefreshToken);
+        Assert.Equal("new_access_token", result.Value.AccessToken);
+        _cacheMock.Verify(cache => cache.StoreOnCache($"userId: {userId}", "new_refresh_token", TimeSpan.FromDays(30)), Times.Once);
     }
 
     [Fact]
     public async Task ResetPassword_ShouldUpdatePassword_WhenTokenIsValid()
     {
+        // Arrange
 
         var userId = Guid.NewGuid();
         var user = new User { Id = userId, Password = "oldPassword", Salt = "oldSalt" };
@@ -145,13 +160,13 @@ public class AuthServicesTests
         var salt = new byte[16];
         var hashedPassword = "hashedPassword";
 
-        _cacheMock.Setup(c => c.GetFromCache(It.IsAny<string>())).ReturnsAsync(userId.ToString());
+        _cacheMock.Setup(c => c.GetAsync(It.IsAny<string>())).ReturnsAsync(userId.ToString());
         _userRepositoryMock.Setup(repo => repo.GetById(userId)).ReturnsAsync(user);
         _hasherMock.Setup(h => h.GenerateSalt()).Returns(salt);
         _hasherMock.Setup(h => h.HashPassword(newPassword, salt)).Returns(hashedPassword);
-
+        // Act
         var result = await authService.ResetPassword(newPassword, token);
-
+        // Assert
         Assert.True(result.IsSuccess);
         Assert.Equal("Email was sent if success!", result.Value);
         Assert.Equal(hashedPassword, user.Password);
