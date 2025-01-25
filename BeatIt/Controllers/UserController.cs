@@ -6,12 +6,12 @@ using BeatIt.Repositories;
 using BeatIt.Services.UserService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace BeatIt.Controllers;
 
 [Route("api/users")]
 [ApiController]
-[ServiceFilter(typeof(UserAuthenticationFilter))]
 public class UserController(IUserService userService, IUserRepository userRepository, ILogger<UserController> logger) : ControllerBase
 {
     private readonly IUserService _userService = userService;
@@ -44,7 +44,8 @@ public class UserController(IUserService userService, IUserRepository userReposi
     }
 
     [Authorize]
-    [HttpPatch()]
+    [HttpPatch("")]
+    [ServiceFilter(typeof(UserAuthenticationFilter))]
     public async Task<IResult> UpdateUser([FromBody] UserUpdateDto updatedUser)
     {
         if (!ModelState.IsValid)
@@ -58,7 +59,7 @@ public class UserController(IUserService userService, IUserRepository userReposi
         var result = await _userService.UpdateUser(updatedUser, user.Id);
         if (result.IsFailure)
         {
-            return Results.NotFound(result.Error);
+            return result.ToProblemDetails();
         }
         return Results.NoContent();
     }
@@ -75,5 +76,17 @@ public class UserController(IUserService userService, IUserRepository userReposi
 
         await _userService.SoftDelete(user.Id);
         return Results.NoContent();
+    }
+
+    [Authorize]
+    [HttpGet("{id}")]
+    public async Task<IResult> GetUser(Guid id)
+    {
+        var result = await _userService.GetUserById(id);
+        if (result.IsFailure)
+        {
+            return Results.NotFound(result.Error);
+        }
+        return Results.Json(result.Value);
     }
 }

@@ -28,4 +28,10 @@ public class CacheService(IDistributedCache cache, ILogger<CacheService> logger)
         });
         _logger.LogDebug("Cache stored value with success");
     }
+
+    public async Task RemoveFromCache(string key)
+    {
+        await _cache.RemoveAsync(key);
+        _logger.LogDebug("Cache removed value with success");
+    }
 }

@@ -9,5 +9,6 @@ namespace BeatIt.Services.AuthService
         Task<Result<string>> SendResetEmail(string email);
         Task<Result<string>> ResetPassword(string newPassword, string token);
         Task<Result<TokenDto>> RefreshToken(string refreshToken);
+        Task<Result> Logout(string refreshToken); 
     }
 }

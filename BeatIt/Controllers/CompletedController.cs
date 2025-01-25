@@ -1,6 +1,6 @@
 using BeatIt.Extensions;
 using BeatIt.Models.DTOs;
-using BeatIt.Services.BacklogService; 
+using BeatIt.Services.BacklogService;
 using BeatIt.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
