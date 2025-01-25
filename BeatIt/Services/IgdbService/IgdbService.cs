@@ -12,15 +12,15 @@ public class IgdbService : IIgdbService
 {
     private readonly ICacheService _cache;
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IOptions<IgdbConfig> _config;
+    private readonly IgdbConfig _config;
     private readonly ILogger<IgdbService> _logger;
     private readonly string _igdbClientId;
     private readonly string _igdbSecretKey;
     public IgdbService(ICacheService cache, IHttpClientFactory httpClientFactory, IOptions<IgdbConfig> config, ILogger<IgdbService> logger)
     {
-        _config = config;
-        _igdbClientId = _config.Value.Secret_Key ?? throw new InvalidOperationException("Igdb client_id is not set");
-        _igdbSecretKey = _config.Value.Secret_Key ?? throw new InvalidOperationException("Igdb secret_key is not set");
+        _config = config.Value;
+        _igdbClientId = _config.ClientId ?? throw new InvalidOperationException("Igdb client_id is not set");
+        _igdbSecretKey = _config.SecretKey ?? throw new InvalidOperationException("Igdb secret_key is not set");
         _logger = logger;
         _cache = cache;
         _httpClientFactory = httpClientFactory;

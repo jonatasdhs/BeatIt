@@ -13,7 +13,7 @@ namespace BeatIt.Services.TokenService
         private readonly IConfiguration _config;
         private readonly ILogger<TokenService> _logger;
 
-        public TokenService(IConfiguration config, IHttpClientFactory httpClientFactory, ILogger<TokenService> logger)
+        public TokenService(IConfiguration config, ILogger<TokenService> logger)
         {
             _config = config;
             _secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtSettings:Secret"]!));

@@ -92,7 +92,7 @@ namespace BeatIt.Services.UserService
         public async Task<Result<UserDto>> UpdateUser(UserUpdateDto updateUser, Guid userId)
         {
             var user = await _userRepository.GetById(userId);
-            if(user is null)
+            if (user is null)
             {
                 return Result.Failure<UserDto>(UserErrors.UserNotFound);
             }
@@ -100,7 +100,8 @@ namespace BeatIt.Services.UserService
             user.Email = updateUser.Email ?? user.Email;
             user.Updated_at = DateTime.UtcNow.ToLocalTime();
             await _userRepository.Update(user);
-            var userDto = new UserDto {
+            var userDto = new UserDto
+            {
                 Email = user.Email,
                 Name = user.Name,
                 Created_at = user.Created_at,

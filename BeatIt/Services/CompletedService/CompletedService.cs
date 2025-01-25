@@ -14,6 +14,7 @@ public class CompletedService(IGameRepository gameRepository, IGameService gameS
     public async Task<Result<string>> AddGameToCompletedList(User user, int gameId, CompletedGameDto completedGame)
     {
         var gameResult = await _gameService.GetOrCreateGame(gameId);
+        
         if (gameResult.IsFailure)
         {
             return Result.Failure<string>(GameErrors.NotFound);

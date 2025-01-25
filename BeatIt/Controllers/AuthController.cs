@@ -1,16 +1,18 @@
 using BeatIt.Extensions;
+using BeatIt.Filters;
 using BeatIt.Models;
 using BeatIt.Models.DTOs;
 using BeatIt.Services.AuthService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BeatIt.Controllers;
 
 [Route("api/auth")]
 [ApiController]
-public class AuthController(IAuthService authInterface, ILogger<AuthController> logger) : ControllerBase
+public class AuthController(IAuthService authService, ILogger<AuthController> logger) : ControllerBase
 {
-    private readonly IAuthService _authInterface = authInterface;
+    private readonly IAuthService _authService = authService;
     private readonly ILogger<AuthController> _logger = logger;
     [HttpPost("login")]
     public async Task<IResult> Login([FromBody] UserLoginDto login)
@@ -18,7 +20,7 @@ public class AuthController(IAuthService authInterface, ILogger<AuthController> 
 
         _logger.LogInformation("Login attempt for user: {user}", login.Email);
 
-        Result<TokenDto> result = await _authInterface.Login(login);
+        Result<TokenDto> result = await _authService.Login(login);
 
         if (result.IsFailure)
         {
@@ -52,11 +54,11 @@ public class AuthController(IAuthService authInterface, ILogger<AuthController> 
             return Results.Unauthorized();
         }
 
-        Result<TokenDto> result = await _authInterface.RefreshToken(refreshToken);
+        Result<TokenDto> result = await _authService.RefreshToken(refreshToken);
         if (result.IsFailure)
         {
             _logger.LogWarning(AppLogEvents.LoginFailed, "Error: {error}", result.Error);
-            return result.ToProblemDetails();
+            return Results.BadRequest(result.Error);
         }
 
         Response.Cookies.Append("AccessToken", result.Value!.AccessToken!, new CookieOptions
@@ -69,10 +71,31 @@ public class AuthController(IAuthService authInterface, ILogger<AuthController> 
         {
             HttpOnly = true,
             Secure = true,
-            Expires = DateTime.UtcNow.AddMinutes(15)
+            Expires = DateTime.UtcNow.AddDays(30)
         });
 
         _logger.LogInformation(AppLogEvents.LoginSuccessful, "Success: Refresh token is valid");
+        return Results.NoContent();
+    }
+    [Authorize]
+    [HttpPost("logout")]
+    [ServiceFilter(typeof(UserAuthenticationFilter))]
+    public async Task<IResult> Logout()
+    {
+        if (HttpContext.Items["AuthenticateUser"] is not User user)
+        {
+            return Results.BadRequest();
+        }
+        var refreshToken = Request.Cookies["RefreshToken"];
+        if (refreshToken != null)
+        {
+            var key = $"{user.Id}:{refreshToken}";
+            await _authService.Logout(key);
+
+            HttpContext.Response.Cookies.Delete("RefreshToken");
+            HttpContext.Response.Cookies.Delete("AccessToken");
+        }
+
         return Results.NoContent();
     }
 }
