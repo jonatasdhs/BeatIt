@@ -24,7 +24,7 @@ services:
     networks:
       - backend
     healthcheck:
-      test: ["CMD", "redis-cli", "-h", "localhost", "-p", "6379", "PING"]
+      test: [ "CMD", "redis-cli", "-h", "localhost", "-p", "6379", "PING" ]
       interval: 10s
       retries: 5
       start_period: 5s
@@ -37,13 +37,12 @@ services:
     ports:
       - "5000:8080"
       - "5001:5001"
+    env_file:
+      - .env
     develop:
-     watch:
+      watch:
         - action: rebuild
           path: .
-    environment:
-      - ConnectionStrings__DefaultConnection=Server=host.docker.internal;Database=BeatItDB;User Id=sa;Password=Password123!;TrustServerCertificate=true;
-      - ConnectionStrings__RedisConnection=redis:6379
     depends_on:
       - sqlserver
       - redis

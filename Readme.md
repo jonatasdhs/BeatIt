@@ -1,13 +1,13 @@
 # BeatIt - Game Backlog Management API
 
-## **Overview**
+## **Introduction**
 BeatIt is a .NET-based API designed to help users manage their gaming backlog and completed games. Users can:
 - Add games to their backlog.
 - Mark games as completed.
 - View games from their backlog and completed lists.
 - Fetch game data from the IGDB API.
 
-This project is built using ASP.NET Core and integrates external data from IGDB to enrich the user's game database.
+This project is built using ASP.NET Core and integrates external data from IGDB to enrich the game database.
 
 ---
 
@@ -15,6 +15,7 @@ This project is built using ASP.NET Core and integrates external data from IGDB 
 ### 1. **User Management**
 - Register new users.
 - Update user details.
+- Soft delete.
 - Authenticate users with secure credentials.
 
 ### 2. **Game Management**
@@ -39,17 +40,16 @@ This project is built using ASP.NET Core and integrates external data from IGDB 
 - **Caching**: Redis
 - **Dependency Injection**: Built-in ASP.NET Core DI
 - **HTTP Client**: Used for IGDB API interactions
+- **Container**: Docker
+- **Testing**: xUnit, Moq
 
 ---
 
 ## **Setup and Installation**
 
 ### **Prerequisites**
-- .NET SDK 7.0 or later
-- SQL Server
-- Redis
+- Docker and Docker Compose installed
 - IGDB Client ID and Secret
-- A compatible IDE (e.g., Visual Studio, JetBrains Rider, or Visual Studio Code)
 
 ### **Installation Steps**
 1. Clone the repository:
@@ -58,30 +58,42 @@ This project is built using ASP.NET Core and integrates external data from IGDB 
    cd BeatIt
    ```
 
-2. Set up the database:
-   - Update the `ConnectionStrings` section in `appsettings.json` with your SQL Server connection details.
-   - Run migrations to create the database schema:
-     ```bash
-     dotnet ef database update
-     ```
-
-3. Configure Redis:
-   - Ensure Redis is running and accessible.
-   - Update the Redis connection string in `appsettings.json`.
-
-4. Set up the IGDB API:
-   - Add your `IGDB_CLIENT_ID` and `IGDB_SECRET_KEY` as environment variables.
-
-5. Run the application:
-   ```bash
-   dotnet run
+2. Copy the `.env.example` file in the root directory and rename it to `.env`. Then, add the following environment variables to the `.env` file:
+   ```env
+   CONNECTIONSTRINGS__DEFAULTCONNECTION=YourDatabaseConnectionString
+   REDIS__CONNECTIONSTRING=redis:6379
+   IGDB_CLIENT_ID=YourIGDBClientID
+   IGDB_SECRET_KEY=YourIGDBSecretKey
    ```
 
-6. Access the API at:
+3. Build and run the application using Docker Compose:
+   ```bash
+   docker-compose up --build
+   ```
+
+4. Access the API at:
    - Local: `http://localhost:5000`
    - Swagger UI: `http://localhost:5000/swagger`
 
 ---
+
+## **Testing**
+This project includes automated tests to ensure the correctness of critical funcionalities.
+
+### **Testing Frameworks**
+- **xUnit**: Main testing framework for .NET.
+- **Moq**: Mocking framework for dependency testing.
+
+### **Running Tests**
+1. Build the Solution:
+```bash
+   dotnet build
+```
+
+2. Run the tests:
+```bash
+   dotnet test
+```
 
 ## **API Endpoints**
 
@@ -111,14 +123,8 @@ This project is built using ASP.NET Core and integrates external data from IGDB 
 - `GET /api/backlog`
   - Retrieve all games in the user's backlog.
 
-- `POST /api/backlog`
+- `POST /api/backlog/{gameId}`
   - Add a game to the backlog.
-  - **Body**:
-    ```json
-    {
-      "gameId": 123
-    }
-    ```
 
 - `DELETE /api/backlog/{gameId}`
   - Remove a game from the backlog.
@@ -132,7 +138,13 @@ This project is built using ASP.NET Core and integrates external data from IGDB 
   - **Body**:
     ```json
     {
-      "gameId": 123
+      "difficulty": 3,
+      "rating": 8,
+      "notes": "Ótimo jogo com uma narrativa envolvente.",
+      "finishedDate": "2024-10-01T14:00:00",
+      "timeToComplete": "20:45:00",
+      "platform": "PC",
+      "startDate": "2024-10-01T14:00:00"
     }
     ```
 
@@ -148,9 +160,9 @@ This project is built using ASP.NET Core and integrates external data from IGDB 
 ## **Environment Variables**
 The application requires the following environment variables:
 - `ConnectionStrings__DefaultConnection`: Database connection string.
-- `Redis__ConnectionString`: Redis connection string.
-- `IGDB_CLIENT_ID`: IGDB API client ID.
-- `IGDB_SECRET_KEY`: IGDB API secret key.
+- `RedisConfigurations__Endpoint`: Redis connection string.
+- `IgdbConfiguration__CLIENT_ID`: IGDB API client ID.
+- `IgdbConfiguration__SECRET_KEY`: IGDB API secret key.
 
 ---
 
@@ -165,20 +177,4 @@ BeatIt
 ├── DataContext      // Entity Framework DbContext
 ├── Migrations       // Database migrations
 ├── Program.cs       // Entry point
-└── appsettings.json // Configuration file
-```
-
----
-
-## **Future Improvements**
-- Implement unit and integration tests to improve reliability.
-- Add pagination for game retrieval endpoints.
-- Enhance error handling with a global exception handler.
-- Improve caching for high-demand data from IGDB.
-- Add user-specific preferences and settings.
-
----
-
-## **Contact**
-Maintained by [Jônatas Daniel Hora Silveira](https://github.com/jonatasdhs). Feel free to open an issue or submit a pull request if you'd like to contribute!
-
+└──

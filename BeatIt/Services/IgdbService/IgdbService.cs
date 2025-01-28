@@ -18,9 +18,10 @@ public class IgdbService : IIgdbService
     private readonly string _igdbSecretKey;
     public IgdbService(ICacheService cache, IHttpClientFactory httpClientFactory, IOptions<IgdbConfig> config, ILogger<IgdbService> logger)
     {
+
         _config = config.Value;
-        _igdbClientId = _config.ClientId ?? throw new InvalidOperationException("Igdb client_id is not set");
-        _igdbSecretKey = _config.SecretKey ?? throw new InvalidOperationException("Igdb secret_key is not set");
+        _igdbClientId = _config.CLIENT_ID ?? throw new InvalidOperationException("Igdb secret_key is not set");;
+        _igdbSecretKey = _config.SECRET_KEY ?? throw new InvalidOperationException("Igdb secret_key is not set");
         _logger = logger;
         _cache = cache;
         _httpClientFactory = httpClientFactory;
@@ -79,6 +80,7 @@ public class IgdbService : IIgdbService
 
     public async Task<CustomTokenResponse> RequestIgdbTokenAsync()
     {
+        Console.WriteLine("Config: ");
         var requestUri = $"https://id.twitch.tv/oauth2/token?client_id={_igdbClientId}&client_secret={_igdbSecretKey}&grant_type=client_credentials";
         _logger.LogInformation("Requesting IGDB token from Twitch API: {Uri}", requestUri);
 

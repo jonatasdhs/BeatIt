@@ -5,8 +5,7 @@ namespace BeatIt.Utils;
 
 public class IgdbConfig
 {
-    /* private readonly IgdbOptions _options; */
-    public string SecretKey { get; set; } = string.Empty;
-    public string ClientId { get; set; } = string.Empty;
+    public string SECRET_KEY { get; set; } = string.Empty;
+    public string CLIENT_ID { get; set; } = string.Empty;
 }
 

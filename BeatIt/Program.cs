@@ -28,7 +28,7 @@ logger.Debug("init main");
 try
 {
     var builder = WebApplication.CreateBuilder(args);
-
+    DotNetEnv.Env.Load();
     builder.Logging.ClearProviders();
 
     builder.Host.UseNLog();
@@ -65,6 +65,7 @@ try
     builder.Services.AddStackExchangeRedisCache(options =>
     {
         var redisConfigs = builder.Configuration.GetSection("RedisConfigurations").Get<RedisConfiguration>() ?? throw new MissingFieldException("Missing redis configs");
+
         var redisConfiguration = new ConfigurationOptions
         {
             /* Password = redisConfigs.Password, */
