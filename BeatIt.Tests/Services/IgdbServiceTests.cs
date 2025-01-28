@@ -33,8 +33,8 @@ public class IgdbServiceTests
 
         _configMock.Setup(config => config.Value).Returns(new IgdbConfig
         {
-            Client_Id = "testClientId",
-            Secret_Key = "testSecretKey"
+            ClientId = "testClientId",
+            SecretKey = "testSecretKey"
         });
 
         _igdbService = new IgdbService(_cacheMock.Object, _httpClientFactoryMock.Object, _configMock.Object, _loggerMock.Object);
