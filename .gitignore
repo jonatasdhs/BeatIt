@@ -88,3 +88,6 @@ _ReSharper*/
 # Azure
 *.publishsettings
 *.azurePubxml
+
+# Enviroment Variables
+.env
